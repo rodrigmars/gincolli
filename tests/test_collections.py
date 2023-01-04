@@ -39,44 +39,45 @@ def eletron(lista: list[int]) -> list[int]:
 
     return lista_copia
 
-def test_spin(setup: list[int]) -> None:
+def test_spin() -> None:
 
-    # assert eletron(setup)
-    spin_send("the darkness that you fear")
+    print()
 
-    pass
+    send_message("the darkness that you fear")
 
-def spin_send(message:str):
+from typing import Dict, List, Tuple
 
-    def particle(text):
+Package = Dict[int, list[str]]
+Spin = List[Tuple[int, List[str]]]
 
-        text_list = list(text)
+def send_message(message: str):
+
+    def particle(text: str) -> Package:
+
+        text_list = [*text]
 
         total = int(len(text_list) / 2)
 
-        package = [{0: text_list[0:total]},
-                   {1: text_list[-total:]}]
+        return {0: text_list[0:total], 1: text_list[-total:]}
 
-        return package
+    def spin(package: Package) -> Spin:
+        return sample([*package.items()], len(package))
 
-    def spin(package: list[dict]):
-        return sample(package, len(package))
-
-    def tigger_spin(package) ->None:
+    def triger(package:  Tuple[int, List[str]]) -> None:
         print("package:>", package)
-
-    print()
 
     while True:
         
         packages = spin(particle(message))
 
+        print("packages: >>", type(packages), packages)
+
         print("-----------------------")
-        tigger_spin(packages[0])
+        triger(packages[0])
         
         sleep(1.5)
         
-        tigger_spin(packages[1])
+        triger(packages[1])
 
 
     # str_1_encoded = data.encode(encoding='UTF-8')
