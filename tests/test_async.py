@@ -1,9 +1,8 @@
-import os
 import pytest
 import asyncio
-import pickle
 from random import sample
 from typing import Dict, List, Tuple, Callable
+from gincolli.infra.dumps_infra import create_dump, read_dump
 
 Package = Dict[int, list[str]]
 Spin = List[Tuple[int, List[str]]]
@@ -35,10 +34,10 @@ async def send_message(message: str):
 
         return {0: text_list[0:shared_size], 1: text_list[-shared_size:]}
 
-    def spin(
-        package: Package) -> Spin: return sample([*package.items()], len(package))
+    def spin(package: Package) -> Spin:
+        return sample([*package.items()], len(package))
 
-    async def photon_trigger_mock(epoc: int) -> None:
+    async def trigger_mock(epoc: int) -> None:
 
         if epoc > 3: return
 
@@ -48,64 +47,74 @@ async def send_message(message: str):
 
         log_terminal("Start")
 
-        await cannon(">>a", 1.2)(packages[0])
+        await cannon(">>a", 1.2, True)(packages[0])
 
-        await cannon("<<b", 2.2)(packages[1])
+        await cannon(">>b", 2.5, True)(packages[1])
 
         log_terminal("fin °°°")
+        
+        await cannon(">>a", 1.2, False)(packages[0])
+        
+        await trigger_mock(epoc)
 
-        await photon_trigger_mock(epoc)
-
-    def cannon(service: str, delay: float):
+    def cannon(service: str, delay: float, cache: bool):
         
         async def send(message):
-            if ">>a" == service:
-                await process_a(message, delay, False)
 
-            elif "<<b" == service:
-                await process_b(message, delay)
+            if service == ">>a":
+                await process_a(message, delay, cache)
+
+            elif service == ">>b":
+                await process_b(message, delay, cache)
 
         return send
 
-    await photon_trigger_mock(0)
+    await trigger_mock(0)
 
 
-async def process_a(message, delay:float, handshake:bool) -> bool:
+async def process_b(message, delay: float, cache: bool) -> bool:
     
     await asyncio.sleep(delay)
 
-    status: str = "interweaving" if not handshake else "handshake"
-    
-    if not handshake:
+    status: str = "interweaving" if cache else "handshake"
+
+    if cache:
 
         print(f"{Colors.CGREEN}{status}{Colors.RESET} - process a:{message}")
-        
-        with open(os.path.join('data', 'message_temp'), 'wb') as file_pk:
-            pickle.dump(message, file_pk)
+
+        await create_dump("message_temp_b", message)
 
     else:
-        def convert_message(lista):
-            return ''.join(lista)
+        def compose(vetor: list[str]) -> str:
+            return ''.join(vetor)
 
-        with open(os.path.join('data', 'message_temp'), 'rb') as file_pk:
+        dump = await read_dump("message_temp_b")
 
-            dump = pickle.load(file_pk)
+        if 0 == message[0]:
+            message = compose(message[1]) + compose(dump[1])
+        else:
+            message = compose(dump[1]) + compose(message[1])
 
-            if 0 == message[0]:
-                message = convert_message(message[1]) + convert_message(dump[1])
-            else:
-                message = convert_message(dump[1]) + convert_message(message[1])
-
-            print(f"{Colors.CGREEN}{status}{Colors.RESET} - message:{Colors.CYELLOW}{message}")
+        print(
+            f"{Colors.CGREEN}{status}{Colors.RESET} - message:{Colors.CYELLOW}{message}")
 
     return True
 
-async def process_b(message, delay:float) -> bool:
+
+async def process_a(message, delay: float, cache: bool) -> bool:
     
     await asyncio.sleep(delay)
-    
-    print(f"{Colors.CGREEN}interweaving{Colors.RESET} - process b:{message}")
-    
-    await process_a(message, .8, True)
+
+    if cache:
+
+        print(f"{Colors.CGREEN}interweaving{Colors.RESET} - process b:{message}")
+
+        await create_dump("message_temp_a", message)
+
+    else:
+
+        message = await read_dump("message_temp_a")
+
+        await process_b(message, 1.8, False)
 
     return True
