@@ -45,6 +45,8 @@ def test_spin() -> None:
 
     send_message("the darkness that you fear")
 
+from random import sample
+from time import sleep
 from typing import Dict, List, Tuple
 
 Package = Dict[int, list[str]]
@@ -56,9 +58,9 @@ def send_message(message: str):
 
         text_list = [*text]
 
-        total = int(len(text_list) / 2)
+        shared_size = int(len(text_list) / 2)
 
-        return {0: text_list[0:total], 1: text_list[-total:]}
+        return {0: text_list[0:shared_size], 1: text_list[-shared_size:]}
 
     def spin(package: Package) -> Spin:
         return sample([*package.items()], len(package))
@@ -66,11 +68,11 @@ def send_message(message: str):
     def triger(package:  Tuple[int, List[str]]) -> None:
         print("package:>", package)
 
-    while True:
+    requests:int = 0
+
+    while requests < 10:
         
         packages = spin(particle(message))
-
-        print("packages: >>", type(packages), packages)
 
         print("-----------------------")
         triger(packages[0])
@@ -78,6 +80,8 @@ def send_message(message: str):
         sleep(1.5)
         
         triger(packages[1])
+
+        requests += 1
 
 
     # str_1_encoded = data.encode(encoding='UTF-8')
