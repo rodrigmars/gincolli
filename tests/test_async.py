@@ -39,7 +39,7 @@ async def send_message(message: str):
 
     async def trigger_mock(epoc: int) -> None:
 
-        if epoc > 3: return
+        if epoc >= 3: return
 
         epoc += 1
 
@@ -47,74 +47,65 @@ async def send_message(message: str):
 
         log_terminal("Start")
 
-        await cannon(">>a", 1.2, True)(packages[0])
+        await cannon(">>a", 1.2)(packages[0])
 
-        await cannon(">>b", 2.5, True)(packages[1])
+        await cannon(">>b", 2.5)(packages[1])
 
-        log_terminal("fin °°°")
+        log_terminal("End")
         
-        await cannon(">>a", 1.2, False)(packages[0])
+        await cannon("a>>b", 1.8)([])
         
         await trigger_mock(epoc)
 
-    def cannon(service: str, delay: float, cache: bool):
+    def cannon(service: str, delay: float):
         
         async def send(message):
 
             if service == ">>a":
-                await process_a(message, delay, cache)
+                await process_a(message, delay)
 
             elif service == ">>b":
-                await process_b(message, delay, cache)
+                await process_b(message, delay)
+
+            elif service == "a>>b":
+                await compose_message(message, delay)
 
         return send
 
     await trigger_mock(0)
 
-
-async def process_b(message, delay: float, cache: bool) -> bool:
+async def process_a(message, delay: float) -> None:
     
     await asyncio.sleep(delay)
 
-    status: str = "interweaving" if cache else "handshake"
+    print(f"{Colors.CGREEN}interweaving{Colors.RESET} - process a:{message}")
 
-    if cache:
-
-        print(f"{Colors.CGREEN}{status}{Colors.RESET} - process a:{message}")
-
-        await create_dump("message_temp_b", message)
-
-    else:
-        def compose(vetor: list[str]) -> str:
-            return ''.join(vetor)
-
-        dump = await read_dump("message_temp_b")
-
-        if 0 == message[0]:
-            message = compose(message[1]) + compose(dump[1])
-        else:
-            message = compose(dump[1]) + compose(message[1])
-
-        print(
-            f"{Colors.CGREEN}{status}{Colors.RESET} - message:{Colors.CYELLOW}{message}")
-
-    return True
+    await create_dump("message_temp_a", message)
 
 
-async def process_a(message, delay: float, cache: bool) -> bool:
+async def process_b(message, delay: float):
     
     await asyncio.sleep(delay)
 
-    if cache:
+    print(f"{Colors.CGREEN}interweaving{Colors.RESET} - process b:{message}")
 
-        print(f"{Colors.CGREEN}interweaving{Colors.RESET} - process b:{message}")
+    await create_dump("message_temp_b", message)
 
-        await create_dump("message_temp_a", message)
+async def compose_message(message, delay: float) -> None:
 
+    await asyncio.sleep(delay)
+
+    def compose(vetor: list[str]) -> str:
+        return ''.join(vetor)
+
+    dump_a = await read_dump("message_temp_a")
+
+    dump_b = await read_dump("message_temp_b")
+
+    if 0 == dump_a[0]:
+        message = compose(dump_a[1]) + compose(dump_b[1])
     else:
+        message = compose(dump_b[1]) + compose(dump_a[1])
 
-        message = await read_dump("message_temp_a")
-
-        await process_b(message, 1.8, False)
-
-    return True
+    print(
+        f"{Colors.CGREEN}compose{Colors.RESET} - message:{Colors.CYELLOW}{message}")
