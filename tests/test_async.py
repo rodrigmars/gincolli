@@ -14,13 +14,59 @@ class Colors:
     CGREEN = '\33[32m'
     CRED = '\33[31m'
 
+
+def get_sping():
+
+    def particle(text: str) -> Package:
+
+        text_list = [*text]
+
+        shared_size = int(len(text_list) / 2)
+
+        return {0: text_list[0:shared_size], 1: text_list[shared_size:]}
+
+    def spin(package: Package) -> Spin:
+        return sample([*package.items()], len(package))
+
+    return spin, particle
+
+def mock_request(service: str, delay: float):
+
+    async def send(message):
+
+        if service == ">>a":
+            await process_a(message, delay)
+
+        elif service == ">>b":
+            await process_b(message, delay)
+
+    return send
+    
 @pytest.mark.asyncio
 # @pytest.mark.skip(reason="")
 async def test_asyncio_spin() -> None:
 
+    def log_terminal(log: str):
+        print(f"{Colors.CYELLOW}{log}")
+
+    message = "the darkness that you fear"
+
+    spin, particle = get_sping()
+
+    packages = spin(particle(message))
+
     print()
 
-    await send_message("the darkness that you fear")
+    log_terminal("Start")
+
+    await mock_request(">>a", 1.2)(packages[0])
+
+    await mock_request(">>b", 2.5)(packages[1])
+
+    log_terminal("End")
+
+    await compose_message(1.8)
+
 
 def test_particle() -> None:
 
@@ -35,48 +81,6 @@ def test_particle() -> None:
     compose = ''.join(package.get(0, "")) + ''.join(package.get(1, ""))
 
     assert text == compose
-
-async def send_message(message: str):
-
-    def log_terminal(log: str):
-        print(f"{Colors.CYELLOW}{log}")
-
-    def particle(text: str) -> Package:
-
-        text_list = [*text]
-
-        shared_size = int(len(text_list) / 2)
-
-        return {0: text_list[0:shared_size], 1: text_list[shared_size:]}
-
-    def spin(package: Package) -> Spin:
-        return sample([*package.items()], len(package))
-
-    def mock_request(service: str, delay: float):
-        
-        async def send(message):
-
-            if service == ">>a":
-                await process_a(message, delay)
-
-            elif service == ">>b":
-                await process_b(message, delay)
-
-        return send
-
-    for i in range(1, 4):
-
-        packages = spin(particle(message))
-
-        log_terminal(f"Start...{i}")
-
-        await mock_request(">>a", 1.2)(packages[0])
-
-        await mock_request(">>b", 2.5)(packages[1])
-
-        log_terminal("End")
-
-        await compose_message(1.8)
 
 
 async def process_a(message, delay: float) -> None:
