@@ -44,6 +44,21 @@ def get_sping():
 
     return spin, particle
 
+async def process_a(message, delay: float) -> None:
+
+    await asyncio.sleep(delay)
+
+    log_share(f"process a:{message}")
+
+    await create_dump("message_temp_a", message)
+
+async def process_b(message, delay: float):
+
+    await asyncio.sleep(delay)
+
+    log_share(f"process b:{message}")
+
+    await create_dump("message_temp_b", message)
 
 def mock_share(position: int, delay: float):
 
@@ -57,8 +72,29 @@ def mock_share(position: int, delay: float):
 
     return send
 
+async def compose_message(delay: float) -> str:
 
-@pytest.mark.skip(reason="")
+    await asyncio.sleep(delay)
+
+    def compose(vetor: list[str]) -> str:
+        return ''.join(vetor)
+
+    dump_a = await read_dump("message_temp_a")
+
+    dump_b = await read_dump("message_temp_b")
+
+    if 0 == dump_a[0]:
+        message = compose(dump_a[1]) + compose(dump_b[1])
+    else:
+        message = compose(dump_b[1]) + compose(dump_a[1])
+
+    log_compose(message)
+
+    return message
+
+
+
+# @pytest.mark.skip(reason="")
 @pytest.mark.asyncio
 async def test_asyncio_spin() -> None:
 
@@ -97,63 +133,36 @@ def test_particle() -> None:
 
     assert text == compose
 
-
-async def process_a(message, delay: float) -> None:
-
-    await asyncio.sleep(delay)
-
-    log_share(f"process a:{message}")
-
-    await create_dump("message_temp_a", message)
-
-async def process_b(message, delay: float):
-
-    await asyncio.sleep(delay)
-
-    log_share(f"process b:{message}")
-
-    await create_dump("message_temp_b", message)
-
-
 @pytest.mark.asyncio
 async def test_process_a() -> None:
 
-    message = "the darkness "
+    package = (1, ['t', 'h', 'a', 't', ' ', 'y', 'o', 'u', ' ', 'f', 'e', 'a', 'r'])
 
-    await process_a(message, 1.3)
+    await process_a(package, 1.3)
 
     dump_a = await read_dump("message_temp_a")
 
-    assert dump_a == message
+    assert ''.join(dump_a[1]).__eq__("that you fear")
 
 @pytest.mark.asyncio
 async def test_process_b() -> None:
 
-    message = "that you fear"
+    package = (0, ['t', 'h', 'e', ' ', 'd', 'a', 'r', 'k', 'n', 'e', 's', 's', ' '])
 
-    await process_b(message, 1.3)
-
-    dump_b = await read_dump("message_temp_b")
-
-    assert dump_b == message
-
-
-async def compose_message(delay: float) -> str:
-
-    await asyncio.sleep(delay)
-
-    def compose(vetor: list[str]) -> str:
-        return ''.join(vetor)
-
-    dump_a = await read_dump("message_temp_a")
+    await process_b(package, 1.3)
 
     dump_b = await read_dump("message_temp_b")
 
-    if 0 == dump_a[0]:
-        message = compose(dump_a[1]) + compose(dump_b[1])
-    else:
-        message = compose(dump_b[1]) + compose(dump_a[1])
+    assert ''.join(dump_b[1]).__eq__("the darkness ")
 
-    log_compose(message)
+@pytest.mark.asyncio
+async def test_compose_message() -> None:
 
-    return message
+    message: str = "the darkness that you fear"
+
+    compose = await compose_message(1.8)
+
+    assert compose.__eq__(message)
+    
+
+
