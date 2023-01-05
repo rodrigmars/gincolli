@@ -15,7 +15,7 @@ class Colors:
     CRED = '\33[31m'
 
 @pytest.mark.asyncio
-@pytest.mark.skip(reason="")
+# @pytest.mark.skip(reason="")
 async def test_asyncio_spin() -> None:
 
     print()
@@ -36,9 +36,6 @@ def test_particle() -> None:
 
     assert text == compose
 
-    # assert ''.join(package.get(0)) + ''.join(package.get(1)) == text
-
-
 async def send_message(message: str):
 
     def log_terminal(log: str):
@@ -55,27 +52,7 @@ async def send_message(message: str):
     def spin(package: Package) -> Spin:
         return sample([*package.items()], len(package))
 
-    async def trigger_mock(epoc: int) -> None:
-
-        if epoc >= 3: return
-
-        epoc += 1
-
-        packages = spin(particle(message))
-
-        log_terminal("Start")
-
-        await cannon(">>a", 1.2)(packages[0])
-
-        await cannon(">>b", 2.5)(packages[1])
-
-        log_terminal("End")
-        
-        await compose_message(1.8)
-        
-        await trigger_mock(epoc)
-
-    def cannon(service: str, delay: float):
+    def mock_request(service: str, delay: float):
         
         async def send(message):
 
@@ -87,7 +64,20 @@ async def send_message(message: str):
 
         return send
 
-    await trigger_mock(0)
+    for i in range(1, 4):
+
+        packages = spin(particle(message))
+
+        log_terminal(f"Start...{i}")
+
+        await mock_request(">>a", 1.2)(packages[0])
+
+        await mock_request(">>b", 2.5)(packages[1])
+
+        log_terminal("End")
+
+        await compose_message(1.8)
+
 
 async def process_a(message, delay: float) -> None:
     
