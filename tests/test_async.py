@@ -53,7 +53,7 @@ async def send_message(message: str):
 
         log_terminal("End")
         
-        await cannon("a>>b", 1.8)([])
+        await compose_message(1.8)
         
         await trigger_mock(epoc)
 
@@ -66,9 +66,6 @@ async def send_message(message: str):
 
             elif service == ">>b":
                 await process_b(message, delay)
-
-            elif service == "a>>b":
-                await compose_message(message, delay)
 
         return send
 
@@ -91,7 +88,7 @@ async def process_b(message, delay: float):
 
     await create_dump("message_temp_b", message)
 
-async def compose_message(message, delay: float) -> None:
+async def compose_message(delay: float) -> None:
 
     await asyncio.sleep(delay)
 
