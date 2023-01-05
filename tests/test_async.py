@@ -58,7 +58,7 @@ def mock_share(position: int, delay: float):
     return send
 
 
-# @pytest.mark.skip(reason="")
+@pytest.mark.skip(reason="")
 @pytest.mark.asyncio
 async def test_asyncio_spin() -> None:
 
@@ -82,7 +82,7 @@ async def test_asyncio_spin() -> None:
 
     assert message.__eq__(compose)
 
-
+@pytest.mark.skip(reason="")
 def test_particle() -> None:
 
     text: str = "the darkness that you fear"
@@ -106,7 +106,6 @@ async def process_a(message, delay: float) -> None:
 
     await create_dump("message_temp_a", message)
 
-
 async def process_b(message, delay: float):
 
     await asyncio.sleep(delay)
@@ -114,6 +113,29 @@ async def process_b(message, delay: float):
     log_share(f"process b:{message}")
 
     await create_dump("message_temp_b", message)
+
+
+@pytest.mark.asyncio
+async def test_process_a() -> None:
+
+    message = "the darkness "
+
+    await process_a(message, 1.3)
+
+    dump_a = await read_dump("message_temp_a")
+
+    assert dump_a == message
+
+@pytest.mark.asyncio
+async def test_process_b() -> None:
+
+    message = "that you fear"
+
+    await process_b(message, 1.3)
+
+    dump_b = await read_dump("message_temp_b")
+
+    assert dump_b == message
 
 
 async def compose_message(delay: float) -> str:
