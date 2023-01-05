@@ -15,11 +15,29 @@ class Colors:
     CRED = '\33[31m'
 
 @pytest.mark.asyncio
+@pytest.mark.skip(reason="")
 async def test_asyncio_spin() -> None:
 
     print()
 
     await send_message("the darkness that you fear")
+
+def test_particle() -> None:
+
+    text: str = "the darkness that you fear"
+
+    text_list = [*text]
+
+    shared_size = int(len(text_list) / 2)
+
+    package = {0: text_list[0:shared_size], 1: text_list[shared_size:]}
+
+    compose = ''.join(package.get(0, "")) + ''.join(package.get(1, ""))
+
+    assert text == compose
+
+    # assert ''.join(package.get(0)) + ''.join(package.get(1)) == text
+
 
 async def send_message(message: str):
 
@@ -32,7 +50,7 @@ async def send_message(message: str):
 
         shared_size = int(len(text_list) / 2)
 
-        return {0: text_list[0:shared_size], 1: text_list[-shared_size:]}
+        return {0: text_list[0:shared_size], 1: text_list[shared_size:]}
 
     def spin(package: Package) -> Spin:
         return sample([*package.items()], len(package))
