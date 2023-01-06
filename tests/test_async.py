@@ -1,129 +1,63 @@
+import os
 import pytest
-import asyncio
+from gincolli.infra.dumps_infra import read_dump
+import gincolli.app as app
 from random import sample
-from typing import Dict, List, Tuple, Callable
-from gincolli.infra.dumps_infra import create_dump, read_dump
 
-Package = Dict[int, list[str]]
-Spin = List[Tuple[int, List[str]]]
-Message = Tuple[int, List[str]]
-Cannon = Callable[[str, float], Callable]
+@pytest.fixture(scope="module")
+def setup():
 
+    
 
-class Colors:
-    CYELLOW = '\33[33m'
-    RESET = '\033[0m'
-    CGREEN = '\33[32m'
-    CRED = '\33[31m'
+    message = "the darkness that you fear"
 
+    text_list = [*message]
 
-def log(log: str):
-    print(f"{Colors.CYELLOW}{log}")
+    shared_size = int(len(text_list) / 2)
 
+    package = sample([(0, text_list[0:shared_size]),
+                    (1, text_list[shared_size:])], 2)
 
-def log_share(log: str):
-    print(f"{Colors.CGREEN}entanglement{Colors.RESET} - {log}")
+    yield package, message
 
+    try:
+        for file in ["message_temp_a", "message_temp_b"]:
+            os.remove(os.path.join('data', file))
 
-def log_compose(log: str):
-    print(f"{Colors.CGREEN}compose{Colors.RESET} - message:{Colors.CYELLOW}{log}")
+    except FileNotFoundError as e:
 
-
-def get_sping():
-
-    def particle(text: str) -> Package:
-
-        text_list = [*text]
-
-        shared_size = int(len(text_list) / 2)
-
-        return {0: text_list[0:shared_size], 1: text_list[shared_size:]}
-
-    def spin(package: Package) -> Spin:
-        return sample([*package.items()], len(package))
-
-    return spin, particle
-
-async def process_a(message, delay: float) -> None:
-
-    await asyncio.sleep(delay)
-
-    log_share(f"process a:{message}")
-
-    await create_dump("message_temp_a", message)
-
-async def process_b(message, delay: float):
-
-    await asyncio.sleep(delay)
-
-    log_share(f"process b:{message}")
-
-    await create_dump("message_temp_b", message)
-
-def mock_share(position: int, delay: float):
-
-    async def send(message):
-
-        if position == 0:
-            await process_a(message, delay)
-
-        elif position == 1:
-            await process_b(message, delay)
-
-    return send
-
-async def compose_message(delay: float) -> str:
-
-    await asyncio.sleep(delay)
-
-    def compose(vetor: list[str]) -> str:
-        return ''.join(vetor)
-
-    dump_a = await read_dump("message_temp_a")
-
-    dump_b = await read_dump("message_temp_b")
-
-    if 0 == dump_a[0]:
-        message = compose(dump_a[1]) + compose(dump_b[1])
-    else:
-        message = compose(dump_b[1]) + compose(dump_a[1])
-
-    log_compose(message)
-
-    return message
-
+        print(e)
 
 
 # @pytest.mark.skip(reason="")
 @pytest.mark.asyncio
-async def test_asyncio_spin() -> None:
+async def test_asyncio_spin(setup) -> None:
 
-    message = "the darkness that you fear"
+    _, message = setup
 
-    spin, particle = get_sping()
+    spin, particle = app.get_sping()
 
     packages = spin(particle(message))
 
     print()
 
-    log("Start")
+    app.log("Start")
 
-    await mock_share(position=0, delay=1.2)(packages[0])
+    await app.mock_share(position=0, delay=1.2)(packages[0])
 
-    await mock_share(position=1, delay=2.5)(packages[1])
+    await app.mock_share(position=1, delay=2.5)(packages[1])
 
-    log("End")
+    app.log("End")
 
-    compose = await compose_message(1.8)
+    compose = await app.compose_message(1.8)
 
     assert message.__eq__(compose)
 
-@pytest.mark.skip(reason="")
-def test_particle() -> None:
+def test_particle(setup) -> None:
 
-    text: str = "the darkness that you fear"
+    _, message = setup
 
-    text_list = [*text]
+    text_list = [*message]
 
     shared_size = int(len(text_list) / 2)
 
@@ -131,38 +65,35 @@ def test_particle() -> None:
 
     compose = ''.join(package.get(0, "")) + ''.join(package.get(1, ""))
 
-    assert text == compose
+    assert message == compose
 
 @pytest.mark.asyncio
-async def test_process_a() -> None:
+async def test_process_a(setup) -> None:
 
-    package = (1, ['t', 'h', 'a', 't', ' ', 'y', 'o', 'u', ' ', 'f', 'e', 'a', 'r'])
+    packages, _ = setup
 
-    await process_a(package, 1.3)
+    await app.process_a(packages[0], 1.3)
 
-    dump_a = await read_dump("message_temp_a")
+    dump = await read_dump("message_temp_a")
 
-    assert ''.join(dump_a[1]).__eq__("that you fear")
-
-@pytest.mark.asyncio
-async def test_process_b() -> None:
-
-    package = (0, ['t', 'h', 'e', ' ', 'd', 'a', 'r', 'k', 'n', 'e', 's', 's', ' '])
-
-    await process_b(package, 1.3)
-
-    dump_b = await read_dump("message_temp_b")
-
-    assert ''.join(dump_b[1]).__eq__("the darkness ")
+    assert packages[0][0] == dump[0]
 
 @pytest.mark.asyncio
-async def test_compose_message() -> None:
+async def test_process_b(setup) -> None:
 
-    message: str = "the darkness that you fear"
+    packages, _ = setup
 
-    compose = await compose_message(1.8)
+    await app.process_b(packages[1], 1.3)
+
+    dump = await read_dump("message_temp_b")
+
+    assert packages[1][0] == dump[0]
+
+@pytest.mark.asyncio
+async def test_compose_message(setup) -> None:
+
+    _, message = setup
+
+    compose = await app.compose_message(1.8)
 
     assert compose.__eq__(message)
-    
-
-
