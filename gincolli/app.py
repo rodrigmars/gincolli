@@ -1,7 +1,7 @@
-import pytest
 import asyncio
 from random import sample
-from typing import Dict, List, Tuple, Callable
+from typing import Any, Dict, List, Tuple, Callable
+
 from gincolli.infra.dumps_infra import create_dump, read_dump
 
 Package = Dict[int, list[str]]
@@ -25,8 +25,14 @@ def log_share(log: str):
     print(f"{Colors.CGREEN}entanglement{Colors.RESET} - {log}")
 
 
+
 def log_compose(log: str):
     print(f"{Colors.CGREEN}compose{Colors.RESET} - message:{Colors.CYELLOW}{log}")
+
+
+def get_chunks(data: Any, num: int) -> list[tuple[int, Any]]:
+    return [(i, data[i*num:i*num+num])
+            for i, _ in enumerate(data[::num])]
 
 
 def get_sping():
@@ -44,35 +50,31 @@ def get_sping():
 
     return spin, particle
 
-async def process_a(message, delay: float) -> None:
+async def process(file:str, message: Tuple[int, str], delay: float) -> None:
 
     await asyncio.sleep(delay)
 
-    log_share(f"process a:{message}")
-
-    await create_dump("message_temp_a", message)
-
-async def process_b(message, delay: float):
-
-    await asyncio.sleep(delay)
-
-    log_share(f"process b:{message}")
-
-    await create_dump("message_temp_b", message)
+    await create_dump(file, message)
 
 def mock_share(position: int, delay: float):
 
-    async def send(message):
+    async def send(package):
 
         if position == 0:
-            await process_a(message, delay)
+            log_share(package)
+            await process("message_temp_a", package, delay)
 
         elif position == 1:
-            await process_b(message, delay)
+            log_share(package)
+            await process("message_temp_b", package, delay)
 
     return send
 
 async def compose_message(delay: float) -> str:
+
+    print()
+    print()
+    print("-----------------")
 
     await asyncio.sleep(delay)
 
@@ -83,16 +85,19 @@ async def compose_message(delay: float) -> str:
 
     dump_b = await read_dump("message_temp_b")
 
-    if 0 == dump_a[0]:
-        message = compose(dump_a[1]) + compose(dump_b[1])
-    else:
-        message = compose(dump_b[1]) + compose(dump_a[1])
+    print("dump_a:", dump_a)
+    print("dump_b:", dump_b)
 
-    log_compose(message)
+    # if 0 == dump_a[0]:
+    #     message = compose(dump_a[1]) + compose(dump_b[1])
+    # else:
+    #     message = compose(dump_b[1]) + compose(dump_a[1])
 
-    return message
+    # log_compose(message)
 
+    # return message
 
+    return ""
 
 
 def main():
