@@ -10,9 +10,6 @@ def setup():
     message:str = "the darkness that you fear"
     
     chunks = app.get_chunks(message, 3)
-    print()
-    print(message)
-    print(">>>>>>>>>>>>>>chunks:", chunks)
 
     package = sample(chunks, len(chunks))
 
@@ -35,8 +32,8 @@ async def test_asyncio_spin(setup) -> None:
     
     key: int = 0
 
-    particles_a = []
-    particles_b = []
+    particles_x = []
+    particles_y = []
 
     for i, p in enumerate(packages, 1):
 
@@ -46,16 +43,16 @@ async def test_asyncio_spin(setup) -> None:
                 if percent == 100 else f"processing:{percent}%")
 
         if key == 0:
-            particles_a.append(p)
+            particles_x.append(p)
             
             key = 1
             continue
 
-        particles_b.append(p)
+        particles_y.append(p)
         key = 0
 
-    await app.mock_share(position=0, delay=.1)(package=particles_a)
-    await app.mock_share(position=1, delay=.07)(package=particles_b)
+    await app.mock_share(position=0, delay=.1)(package=particles_x)
+    await app.mock_share(position=1, delay=.07)(package=particles_y)
 
     compose = await app.compose_message(.2)
     

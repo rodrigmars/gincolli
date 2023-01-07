@@ -62,11 +62,11 @@ def mock_share(position: int, delay: float):
 
         if 0 == position:
             log_share(package)
-            await process("message_temp_a", package, delay)
+            await process("message_temp_0", package, delay)
 
         elif 1 == position:
             log_share(package)
-            await process("message_temp_b", package, delay)
+            await process("message_temp_1", package, delay)
 
     return send
 
@@ -74,16 +74,13 @@ async def compose_message(delay: float) -> str:
 
     await asyncio.sleep(delay)
 
-    # def compose(vetor: list[str]) -> str:
-    #     return ''.join(vetor)
+    dump_x = await read_dump("message_temp_0")
 
-    dump_a = await read_dump("message_temp_a")
+    dump_y = await read_dump("message_temp_1")
 
-    dump_b = await read_dump("message_temp_b")
-
-    message_list = sorted(dump_a + dump_b)
+    particles_list = sorted(dump_x + dump_y)
     
-    return ''.join(map(lambda a: a[1], message_list))
+    return ''.join(map(lambda m: m[1], particles_list))
 
 
 def main():
