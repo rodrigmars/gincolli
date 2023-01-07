@@ -30,7 +30,7 @@ def log_compose(log: str):
     print(f"{Colors.CGREEN}compose{Colors.RESET} - message:{Colors.CYELLOW}{log}")
 
 
-def get_chunks(data: Any, num: int) -> list[tuple[int, Any]]:
+def get_chunks(data: Any, num: int) -> list[tuple[int, str]]:
     return [(i, data[i*num:i*num+num])
             for i, _ in enumerate(data[::num])]
 
@@ -60,11 +60,11 @@ def mock_share(position: int, delay: float):
 
     async def send(package):
 
-        if position == 0:
+        if 0 == position:
             log_share(package)
             await process("message_temp_a", package, delay)
 
-        elif position == 1:
+        elif 1 == position:
             log_share(package)
             await process("message_temp_b", package, delay)
 
@@ -72,32 +72,18 @@ def mock_share(position: int, delay: float):
 
 async def compose_message(delay: float) -> str:
 
-    print()
-    print()
-    print("-----------------")
-
     await asyncio.sleep(delay)
 
-    def compose(vetor: list[str]) -> str:
-        return ''.join(vetor)
+    # def compose(vetor: list[str]) -> str:
+    #     return ''.join(vetor)
 
     dump_a = await read_dump("message_temp_a")
 
     dump_b = await read_dump("message_temp_b")
 
-    print("dump_a:", dump_a)
-    print("dump_b:", dump_b)
-
-    # if 0 == dump_a[0]:
-    #     message = compose(dump_a[1]) + compose(dump_b[1])
-    # else:
-    #     message = compose(dump_b[1]) + compose(dump_a[1])
-
-    # log_compose(message)
-
-    # return message
-
-    return ""
+    message_list = sorted(dump_a + dump_b)
+    
+    return ''.join(map(lambda a: a[1], message_list))
 
 
 def main():

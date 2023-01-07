@@ -7,9 +7,12 @@ from random import sample
 @pytest.fixture(scope="module")
 def setup():
 
-    message = "the darkness that you fear"
+    message:str = "the darkness that you fear"
     
     chunks = app.get_chunks(message, 2)
+    print()
+    print(message)
+    print(">>>>>>>>>>>>>>chunks:", chunks)
 
     package = sample(chunks, len(chunks))
 
@@ -32,7 +35,8 @@ async def test_asyncio_spin(setup) -> None:
     
     key: int = 0
 
-    print()
+    particles_a = []
+    particles_b = []
 
     for i, p in enumerate(packages, 1):
 
@@ -42,17 +46,22 @@ async def test_asyncio_spin(setup) -> None:
                 if percent == 100 else f"processing:{percent}%")
 
         if key == 0:
-
-            await app.mock_share(position=key, delay=.1)(package=p)
+            particles_a.append(p)
+            
             key = 1
             continue
 
-        await app.mock_share(position=key, delay=.07)(package=p)
+        particles_b.append(p)
         key = 0
 
-    compose = await app.compose_message(1.8)
+    await app.mock_share(position=0, delay=.1)(package=particles_a)
+    await app.mock_share(position=1, delay=.07)(package=particles_b)
 
-    # assert message.__eq__(compose)
+    compose = await app.compose_message(2.2)
+    
+    print(f"message compose:{compose}")
+
+    assert message.__eq__(compose)
 
 @pytest.mark.skip(reason="")
 def test_particle(setup) -> None:
