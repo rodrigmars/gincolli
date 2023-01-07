@@ -9,7 +9,7 @@ def setup():
 
     message:str = "the darkness that you fear"
     
-    chunks = app.get_chunks(message, 2)
+    chunks = app.get_chunks(message, 3)
     print()
     print(message)
     print(">>>>>>>>>>>>>>chunks:", chunks)
@@ -26,7 +26,7 @@ def setup():
 
         print(e)
 
-from asyncio import create_task
+
 
 @pytest.mark.asyncio
 async def test_asyncio_spin(setup) -> None:
@@ -57,7 +57,7 @@ async def test_asyncio_spin(setup) -> None:
     await app.mock_share(position=0, delay=.1)(package=particles_a)
     await app.mock_share(position=1, delay=.07)(package=particles_b)
 
-    compose = await app.compose_message(2.2)
+    compose = await app.compose_message(.2)
     
     print(f"message compose:{compose}")
 

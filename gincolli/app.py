@@ -1,6 +1,6 @@
 import asyncio
 from random import sample
-from typing import Any, Dict, List, Tuple, Callable
+from typing import Dict, List, Tuple, Callable
 
 from gincolli.infra.dumps_infra import create_dump, read_dump
 
@@ -30,7 +30,7 @@ def log_compose(log: str):
     print(f"{Colors.CGREEN}compose{Colors.RESET} - message:{Colors.CYELLOW}{log}")
 
 
-def get_chunks(data: Any, num: int) -> list[tuple[int, str]]:
+def get_chunks(data: str, num: int) -> list[tuple[int, str]]:
     return [(i, data[i*num:i*num+num])
             for i, _ in enumerate(data[::num])]
 
