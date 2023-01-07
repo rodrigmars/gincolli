@@ -1,6 +1,6 @@
 # GINCOLLI
 
-Algoritmo **funcional** criado para simular o teletransporte de pacotes usando o "conceito dos QuBit" para troca de textos entre os nós(A, B e C). Esta é uma simulação criada para compreender a mecânica dos spins em seus diferentes estados.
+Algoritmo **funcional** criado para simular o teletransporte de pacotes usando o "conceito dos QuBit" na troca de dados entre os nós(A, B e C). Esta é uma simulação criada para compreender a mecânica dos vetores em seus diferentes estados.
 
 ## Mensagem
 

@@ -37,20 +37,21 @@ async def test_asyncio_spin(setup) -> None:
 
     for i, p in enumerate(packages, 1):
 
-        percent = int(i / len(packages) * 100)
+        # percent = int(i / len(packages) * 100)
 
-        app.log(f"processed:{percent}%"
-                if percent == 100 else f"processing:{percent}%")
+        # app.log(f"processed:{percent}%"
+        #         if percent == 100 else f"processing:{percent}%")
 
         if key == 0:
             particles_x.append(p)
-            
+
             key = 1
             continue
 
         particles_y.append(p)
         key = 0
 
+    print()
     await app.mock_share(position=0, delay=.1)(package=particles_x)
     await app.mock_share(position=1, delay=.07)(package=particles_y)
 
