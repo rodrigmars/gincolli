@@ -1,3 +1,4 @@
+from os import system, name
 import asyncio
 from random import sample
 from typing import Dict, List, Tuple, Callable
@@ -15,6 +16,10 @@ class Colors:
     RESET = '\033[0m'
     CGREEN = '\33[32m'
     CRED = '\33[31m'
+
+
+def clear():
+    system('clear' if name.__eq__('posix') else 'cls')
 
 
 def log(log: str):
@@ -85,10 +90,54 @@ async def compose_message(delay: float) -> str:
     return ''.join(map(lambda m: m[1], particles_list))
 
 
-def main():
-    pass
+async def main(message: str):
+
+    clear()
+
+    automatic_message = "Newton's third law - the only way humans \
+have ever figured out of getting somewhere is to leave something behind."
+
+    message = message if len(message) >= 1 else automatic_message
+
+    # chunks = get_chunks(message, 3)
+
+    # packages = sample(chunks, len(chunks))
+
+    # key: int = 0
+
+    # particles_x = []
+    # particles_y = []
+
+    # for _, p in enumerate(packages, 1):
+
+    #     if key == 0:
+    #         particles_x.append(p)
+
+    #         key = 1
+    #         continue
+
+    #     particles_y.append(p)
+    #     key = 0
+
+    # print()
+
+    # await mock_share(position=0, delay=.1)(package=particles_x)
+    # await mock_share(position=1, delay=.07)(package=particles_y)
+
+    # compose = await compose_message(.2)
+
+    # print(f"message compose:{compose}")
+
+    # if message.__eq__(compose):
+    #     print("MENSAGEM RECEPCIONADA COM SUCESSO")
 
 
 if __name__ == '__main__':
 
-    main()
+    clear()
+
+    script = "\nrunning the Gincolli console...\n\nEnter a message for transmission \
+or allow the system to automatically send\n_: "
+
+    asyncio.run(
+        main(input(script).strip()))
