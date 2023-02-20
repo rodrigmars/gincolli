@@ -99,37 +99,32 @@ have ever figured out of getting somewhere is to leave something behind."
 
     message = message if len(message) >= 1 else automatic_message
 
-    # chunks = get_chunks(message, 3)
+    chunks = get_chunks(message, 3)
 
-    # packages = sample(chunks, len(chunks))
+    packages = sample(chunks, len(chunks))
 
-    # key: int = 0
+    key: int = 0
 
-    # particles_x = []
-    # particles_y = []
+    particles_x = []
+    particles_y = []
 
-    # for _, p in enumerate(packages, 1):
+    for _, p in enumerate(packages, 1):
 
-    #     if key == 0:
-    #         particles_x.append(p)
+        if key == 0:
+            particles_x.append(p)
 
-    #         key = 1
-    #         continue
+            key = 1
+            continue
 
-    #     particles_y.append(p)
-    #     key = 0
+        particles_y.append(p)
+        key = 0
 
-    # print()
+    await mock_share(position=0, delay=.1)(package=particles_x)
+    await mock_share(position=1, delay=.07)(package=particles_y)
 
-    # await mock_share(position=0, delay=.1)(package=particles_x)
-    # await mock_share(position=1, delay=.07)(package=particles_y)
+    compose = await compose_message(.2)
 
-    # compose = await compose_message(.2)
-
-    # print(f"message compose:{compose}")
-
-    # if message.__eq__(compose):
-    #     print("MENSAGEM RECEPCIONADA COM SUCESSO")
+    print(f"\nmessage compose:> {compose}\n")
 
 
 if __name__ == '__main__':
