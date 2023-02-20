@@ -22,8 +22,14 @@ Baixando depedências:
 pip install -r requirements.txt
 ```
 
-Lançando módulo de teste
+Lançando módulo de **teste**
 
 ```bash
 pytest -s -v tests/test_async.py
+```
+
+Lançando módulo **app**
+
+```bash
+python gincolli/app.py
 ```
