@@ -131,8 +131,8 @@ if __name__ == '__main__':
 
     clear()
 
-    script = "\nrunning the Gincolli console...\n\nEnter a message for transmission \
-or allow the system to automatically send\n_: "
+    script = "\nexecutando o console Gincolli...\n\nDigite uma mensagem para transmissão \
+ou tecle ENTER para mensagem automática\n_: "
 
     asyncio.run(
         main(input(script).strip()))
