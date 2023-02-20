@@ -2,7 +2,7 @@ import asyncio
 from random import sample
 from typing import Dict, List, Tuple, Callable
 
-from gincolli.infra.dumps_infra import create_dump, read_dump
+from infra.dumps_infra import create_dump, read_dump
 
 Package = Dict[int, list[str]]
 Spin = List[Tuple[int, List[str]]]
@@ -23,7 +23,6 @@ def log(log: str):
 
 def log_share(log: str):
     print(f"{Colors.CGREEN}entanglement{Colors.RESET} - {log}")
-
 
 
 def log_compose(log: str):
@@ -50,11 +49,13 @@ def get_sping():
 
     return spin, particle
 
-async def process(file:str, message: Tuple[int, str], delay: float) -> None:
+
+async def process(file: str, message: Tuple[int, str], delay: float) -> None:
 
     await asyncio.sleep(delay)
 
     await create_dump(file, message)
+
 
 def mock_share(position: int, delay: float):
 
@@ -70,6 +71,7 @@ def mock_share(position: int, delay: float):
 
     return send
 
+
 async def compose_message(delay: float) -> str:
 
     await asyncio.sleep(delay)
@@ -79,7 +81,7 @@ async def compose_message(delay: float) -> str:
     dump_y = await read_dump("message_temp_1")
 
     particles_list = sorted(dump_x + dump_y)
-    
+
     return ''.join(map(lambda m: m[1], particles_list))
 
 
